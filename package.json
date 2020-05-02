@@ -5,13 +5,15 @@
     "node": ">=7.6.0",
     "npm": ">=4.1.2"
   },
-  "scripts": {
-    "ng": "ng",
-    "build": "ng build --prod",
-    "test": "ng test",
-    "lint": "ng lint",
-    "e2e": "ng e2e",
-    "postinstall": " npm install -g @angular/cli --unsafe-perm=true && npm run build"
+    "scripts": {
+      "ng": "ng",
+      "start": "ng serve",
+      "build": "ng build",
+      "test": "ng test",
+      "lint": "ng lint",
+      "e2e": "ng e2e",
+      "prod-build-dev": "ng build --prod --build-optimizer",
+      "prod-build-staging": "ng build --prod --configuration=staging --build-optimizer"
   },
   "private": true,
   "dependencies": {
