@@ -1,6 +1,6 @@
 .DS_STORE
 
-/dist/
+
 /integration/bazel/bazel-*
 *.log
 node_modules

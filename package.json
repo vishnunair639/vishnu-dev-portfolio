@@ -3,7 +3,8 @@
   "version": "1.0.0",
     "scripts": {
       "ng": "ng",
-      "build": "ng build --prod --build-optimizer && ng serve",
+      "start": "ng serve",
+      "build": "ng build --prod --build-optimizer",
       "test": "ng test",
       "lint": "ng lint",
       "e2e": "ng e2e"
