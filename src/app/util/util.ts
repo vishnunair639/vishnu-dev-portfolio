@@ -1,80 +1,102 @@
-import { Component, OnInit } from '@angular/core';
-import { BroadcastService, MsalService } from '@azure/msal-angular';
-import { Logger, CryptoUtils } from 'msal';
-import { HttpClient } from '@angular/common/http';
-import { logging } from 'protractor';
-const GRAPH_ENDPOINT = 'https://graph.microsoft.com/v1.0/me';
-const accessTokenRequest = {
-  scopes: ["user.read"]
+import { BrowserModule } from '@angular/platform-browser';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { NgModule } from '@angular/core';
+
+import { MatButtonModule } from '@angular/material/button';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatListModule } from '@angular/material/list';
+
+import { AppRoutingModule } from './app-routing.module';
+import { AppComponent } from './app.component';
+import { ProfileComponent } from './profile/profile.component';
+import { DataService } from "./services/data.service";
+import {
+  MsalModule,
+  MsalInterceptor,
+  MSAL_CONFIG,
+  MSAL_CONFIG_ANGULAR,
+  MsalService,
+  MsalAngularConfiguration
+} from '@azure/msal-angular';
+import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
+import { HomeComponent } from './home/home.component';
+import { Configuration } from 'msal';
+
+
+export const protectedResourceMap: [string, string[]][] = [
+  ['https://graph.microsoft.com/v1.0/me', ['user.read']]
+];
+
+const isIE = window.navigator.userAgent.indexOf("MSIE ") > -1 || window.navigator.userAgent.indexOf("Trident/") > -1;
+
+function MSALConfigFactory(dataService : DataService): Configuration {
+  return {
+    auth: {
+      clientId: dataService.MSALConfigFactory().auth.clientId,
+      authority: "https://login.microsoftonline.com/common/",
+      validateAuthority: true,
+      redirectUri: "http://localhost:4200/",
+      postLogoutRedirectUri: "http://localhost:4200/",
+      navigateToLoginRequestUrl: true,
+    },
+    cache: {
+      cacheLocation: "localStorage",
+      storeAuthStateInCookie: isIE, // set to true for IE 11
+    },
+  };
 }
 
-@Component({
-  selector: 'app-root',
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
+function MSALAngularConfigFactory(dataService : DataService): MsalAngularConfiguration {
+  return {
+    popUp: !isIE,
+    consentScopes: [
+      "user.read",
+      "openid",
+      "profile",
+      "api://a88bb933-319c-41b5-9f04-eff36d985612/access_as_user"
+    ],
+    unprotectedResources: ["https://www.microsoft.com/en-us/"],
+    protectedResourceMap,
+    extraQueryParameters: {}
+  };
+}
+
+@NgModule({
+  declarations: [
+    AppComponent,
+    ProfileComponent,
+    HomeComponent,
+  ],
+  imports: [
+    BrowserModule,
+    AppRoutingModule,
+    BrowserAnimationsModule,
+    HttpClientModule,
+    MatToolbarModule,
+    MatButtonModule,
+    MatListModule,
+    AppRoutingModule,
+    MsalModule
+  ],
+  providers: [
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: MsalInterceptor,
+      multi: true
+    },
+    {
+      provide: MSAL_CONFIG,
+      useFactory: MSALConfigFactory,
+      deps: [DataService]
+    },
+    {
+      provide: MSAL_CONFIG_ANGULAR,
+      useFactory: MSALAngularConfigFactory
+    },
+    MsalService,
+    DataService
+  ],
+  bootstrap: [AppComponent]
 })
-export class AppComponent implements OnInit {
-  title = 'MSAL - Angular 9 Sample App';
-  isIframe = false;
-  loggedIn = false;
-  profile: any;
-  msalToken;
+export class AppModule { }
 
-  constructor(private broadcastService: BroadcastService,
-    private authService: MsalService,
-    private http: HttpClient) { }
-
-  ngOnInit() {
-    this.isIframe = window !== window.parent && !window.opener;
-    this.login();
-  }
-
-  checkoutAccount() {
-    this.loggedIn = !!this.authService.getAccount();
-  }
-
-  login() {
-    const isIE = window.navigator.userAgent.indexOf('MSIE ') > -1 || window.navigator.userAgent.indexOf('Trident/') > -1;
-    if (isIE) {
-      this.authService.loginRedirect();
-    } else {
-      this.authService.loginPopup();
-    }
-  }
-
-  logout() {
-    this.authService.logout();
-  }
-
-  loginPromise = this.broadcastService.subscribe('msal:loginSuccess', response => {
-    console.log('Login Success');
-    this.authService.acquireTokenSilent(accessTokenRequest);
-  });
-
-  getTokenPromiseSuccess = this.broadcastService.subscribe("msal:acquireTokenSuccess", (payload) => {
-     console.log('Access Token Success');
-     this.msalToken = payload.accessToken;
-  });
-  getTokenPromiseFailure = this.broadcastService.subscribe("msal:acquireTokenFailure", (err) => {
-    console.log('Access Token Failure', err);
-  });
-  getToken() {
-    if(this.getTokenPromiseSuccess){
-      console.log('API to getToken');
-      return console.log(this.msalToken);
-    }
-    else{
-      console.log('Calling getToken recursively');
-      this.getToken();
-    }
-
-  }
-  getProfile() {
-    this.http.get(GRAPH_ENDPOINT)
-      .toPromise().then(profile => {
-
-        this.profile = profile;
-      });
-  }
-
-}
