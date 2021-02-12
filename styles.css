@@ -9,10 +9,11 @@ body {
 }
 .site-header{
   font-weight: 700;
-  font-size: 28px;
+  font-size: 32px;
   line-height: 28px;
   margin: 35px 10px;
   text-transform: uppercase;
+  color:#ffffff;
 }
 
 nav {
