@@ -1,5 +1,7 @@
+
 body {
-  font-family: 'Rubik', sans-serif;
+  @import url('https://fonts.googleapis.com/css2?family=Open+Sans&display=swap');
+  font-family: 'Open Sans', sans-serif;
   margin: 0px;
   display: flex;
   width: 100%;
@@ -7,13 +9,11 @@ body {
   background-color: #000000;
   color:#ffffff;
 }
-.site-header{
-  font-weight: 700;
-  font-size: 32px;
-  line-height: 28px;
-  margin: 35px 10px;
-  text-transform: uppercase;
-  color:#ffffff;
+.site-header {
+  width: 345px;
+  height: 84px;
+  margin-top: 20px;
+  /* max-width: 331px; */
 }
 
 nav {
@@ -45,7 +45,7 @@ nav {
   height: 21px;
   margin: 0px;
   padding: 15px;
-  background-color: #688036;
+  background-color: #368049d7;
   border-radius: 25px;
   text-transform: uppercase;
   color: #ffffff ;
